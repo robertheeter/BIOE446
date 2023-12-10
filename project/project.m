@@ -23,123 +23,100 @@ clear
 %addpath(genpath('data/'));
 %filename = 'watershed_example.png';
 
+
+%% STEP 1
+
 addpath(genpath('data/CMV_smFISH/DAPI'));
-filename = 'DAPI_B.tif';
+dapi_file = 'DAPI_A.tif';
+mrna_file = 'mRNA_A.tif';
 
-img = imread(filename);
-img_double = im2double(img);
-
-figure(1)
-imshow(img_double)
-
-%%
-
-% Reduce background noise using median filtering
-filtered_dapi = medfilt2(img_double, [3, 3]);
-
-% Adaptive thresholding to binarize the image
-threshold = adaptthresh(filtered_dapi, 0.5);
-binary_dapi = imbinarize(filtered_dapi, threshold);
-
-% Fill holes in the binary image
-filled_dapi = imfill(binary_dapi, 'holes');
-
-% Distance transform to find regional maxima for watershed
-D = -bwdist(~filled_dapi);
-Ld = watershed(D);
-
-img_2 = filled_dapi;
-img_2(Ld == 0) = 0;
+dapi_img = im2double(imread(dapi_file));
+mrna_img = im2double(imread(mrna_file));
 
 figure
-imshow(img_2);
-
-% Try by removing minima
-mask = imextendedmin(D, 10);
-D2 = imimposemin(D, mask);
-Ld2 = watershed(D2);
-
-
-img_3 = filled_dapi;
-img_3(Ld2 == 0) = 0;
+imshow(dapi_img)
+title('Original DAPI Image')
 
 figure
-imshow(img_3);
+imshow(mrna_img)
+title('Original mRNA Image')
+
+[areas, labels, num_objects] = isolate_nuclei(dapi_img);
+
+
+%% STEP 2 (currently done with part D) 
+for i = 64:num_objects
+    if areas(i) > 10000
+        nucleus_mask = (labels == i);
+    
+        intensities = isolate_mrna(mrna_img, nucleus_mask)
+        break
+    end
+end
 
 
 
 
 
-
-%% Applying the distance transform for watershedding
-
-D = bwdist(~img);
-
-figure(2)
-imshow(D,[]);
-
-%% Getting boundaries with watershed transform
-
-Ld = watershed(D);
-
-img_2 = img;
-
-img_2(Ld == 0) = 0;
-
-figure(3)
-imshow(img_2)
-
-%% Filter our small local minima using imextendedmin
-
-mask = imextendedmin(D,2);
-D2 = imimposemin(D, mask);
-Ld2 = watershed(D2);
-
-img_3 = img;
-img_3(Ld2 == 0) = 0;
-
-figure(4)
-imshow(img_3)
-
-%% Counting number and area of objects in image
-
-stats = regionprops('Table', img_3, 'Area');
-
-%% Binarizing with multithresh and imquantize v. imbinarize
-
-filename = 'coins.png';
-
-img = imread(filename);
-figure(5)
-imshow(img)
-
-%% Binarizing with imbinarize
-
-img_bn = imbinarize(img, 'Adaptive');
-
-figure(6)
-imshow(img_bn, [])
-
-%% Binarizing with multithresh and imquantize
-
-level = multithresh(img, 2);
-img_qt = imquantize(img,level);
-
-figure(7)
-imshow(img_qt,[])
-
-
-
-
-
-
-%% Problem 2: 2D pattern formation in the Gray-Scott model
-disp('PROBLEM 2')
-% clear
-
-%% Problem 2, Part A
 
 
 %% Functions
 
-% None
+function [areas, labels, num_objects] = isolate_nuclei(dapi_img)
+    % Reduce background noise using median filtering
+    filtered_dapi = medfilt2(dapi_img, [3, 3]);
+    
+    % Adaptive thresholding to binarize the image
+    threshold = adaptthresh(filtered_dapi, 0.5);
+    binary_dapi = imbinarize(filtered_dapi, threshold);
+    
+    % Fill holes in the binary image
+    filled_dapi = imfill(binary_dapi, 'holes');
+    
+    % Distance transform to find regional maxima for watershed
+    D = -bwdist(~filled_dapi);
+    
+    % Filtering out tiny local minimum
+    mask = imextendedmin(D, 2);
+    D2 = imimposemin(D, mask);
+    Ld2 = watershed(D2);
+    
+    dapi_img_2 = filled_dapi;
+    dapi_img_2(Ld2 == 0) = 0;
+
+    figure
+    imshow(dapi_img_2)
+    title('Segmented DAPI Image')
+
+    % Get areas of objects
+    areas = table2array(regionprops('Table', dapi_img_2, 'Area'));
+    fprintf('There are %i detected nuclei.\n', sum(areas > 10000))
+    
+    % Get object labels and number of objects
+    [labels, num_objects] = bwlabel(dapi_img_2);
+end
+
+
+function intensities = isolate_mrna(mrna_img, nucleus_mask)
+    % Apply thresholding to isolate mRNA signal
+    level = multithresh(mrna_img);
+    mrna_binary = imbinarize(mrna_img, level);
+    
+    % Isolate nucleus from mRNA image
+    mrna_isolated = mrna_img.*nucleus_mask;
+    mrna_binary_isolated = mrna_binary.*nucleus_mask;
+
+    figure
+    imshow(mrna_binary_isolated)
+    title('Segmented mRNA Image')
+    
+    mrna_labeled = bwlabel(mrna_binary_isolated);
+
+    pixel_intensity = table2array(regionprops('Table', mrna_labeled, mrna_isolated, 'MeanIntensity'));
+    areas = table2array(regionprops('Table', mrna_labeled, 'Area'));
+    intensities = areas.*pixel_intensity;
+end
+
+
+
+

@@ -1,5 +1,8 @@
 %% Loading Image
 
+%addpath(genpath('data/CMV_smFISH/DAPI'));
+%filename = 'DAPI_A.tif';
+
 filename = 'watershed_example.png';
 img = imread(filename);
 
@@ -8,7 +11,7 @@ imshow(img);
 
 
 %%  Applying distrance transform for watershed
-
+img = filled_dapi;
 D = -bwdist(~img);
 
 figure(2)
@@ -45,6 +48,7 @@ img_3(Ld2 == 0) = 0;
 
 figure(6)
 imshow(img_3);
+
 
 %% Getting number and area of objects
 
