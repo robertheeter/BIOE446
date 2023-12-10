@@ -26,9 +26,9 @@ clear
 
 %% STEP 1
 
-addpath(genpath('data/CMV_smFISH/DAPI'));
-dapi_file = 'DAPI_A.tif';
-mrna_file = 'mRNA_A.tif';
+addpath(genpath('data/CMV_smFISH/'));
+dapi_file = 'DAPI/DAPI_B.tif';
+mrna_file = 'mRNA/mRNA_B.tif';
 
 dapi_img = im2double(imread(dapi_file));
 mrna_img = im2double(imread(mrna_file));
@@ -45,18 +45,23 @@ title('Original mRNA Image')
 
 
 %% STEP 2 (currently done with part D) 
-for i = 64:num_objects
+
+% Loop through each object and check if its a nucleus (>10000)
+% If nucleus, then make a mask and isolate mRNA
+
+total = [];
+
+for i = 1:num_objects
     if areas(i) > 10000
         nucleus_mask = (labels == i);
     
-        intensities = isolate_mrna(mrna_img, nucleus_mask)
-        break
+        [num_spots, intensities] = isolate_mrna(mrna_img, nucleus_mask);
+        num_spots
+        total = [total; intensities];
     end
 end
 
-
-
-
+histogram(total, 50)
 
 
 
@@ -97,7 +102,7 @@ function [areas, labels, num_objects] = isolate_nuclei(dapi_img)
 end
 
 
-function intensities = isolate_mrna(mrna_img, nucleus_mask)
+function [num_spots, intensities] = isolate_mrna(mrna_img, nucleus_mask)
     % Apply thresholding to isolate mRNA signal
     level = multithresh(mrna_img);
     mrna_binary = imbinarize(mrna_img, level);
@@ -106,15 +111,16 @@ function intensities = isolate_mrna(mrna_img, nucleus_mask)
     mrna_isolated = mrna_img.*nucleus_mask;
     mrna_binary_isolated = mrna_binary.*nucleus_mask;
 
-    figure
-    imshow(mrna_binary_isolated)
-    title('Segmented mRNA Image')
+    % figure
+    % imshow(mrna_binary_isolated)
+    % title('Segmented mRNA Image')
     
     mrna_labeled = bwlabel(mrna_binary_isolated);
 
     pixel_intensity = table2array(regionprops('Table', mrna_labeled, mrna_isolated, 'MeanIntensity'));
     areas = table2array(regionprops('Table', mrna_labeled, 'Area'));
     intensities = areas.*pixel_intensity;
+    num_spots = length(intensities);
 end
 
 
