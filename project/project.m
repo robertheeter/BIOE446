@@ -20,17 +20,60 @@ clear
 % dots are single mRNAs; mRNA production happens in bursts
 % count how many mRNA in cell
 
-addpath(genpath('data'));
-filename = 'watershed_example.png';
+%addpath(genpath('data/'));
+%filename = 'watershed_example.png';
+
+addpath(genpath('data/CMV_smFISH/DAPI'));
+filename = 'DAPI_B.tif';
 
 img = imread(filename);
+img_double = im2double(img);
 
 figure(1)
-imshow(img)
+imshow(img_double)
+
+%%
+
+% Reduce background noise using median filtering
+filtered_dapi = medfilt2(img_double, [3, 3]);
+
+% Adaptive thresholding to binarize the image
+threshold = adaptthresh(filtered_dapi, 0.5);
+binary_dapi = imbinarize(filtered_dapi, threshold);
+
+% Fill holes in the binary image
+filled_dapi = imfill(binary_dapi, 'holes');
+
+% Distance transform to find regional maxima for watershed
+D = -bwdist(~filled_dapi);
+Ld = watershed(D);
+
+img_2 = filled_dapi;
+img_2(Ld == 0) = 0;
+
+figure
+imshow(img_2);
+
+% Try by removing minima
+mask = imextendedmin(D, 10);
+D2 = imimposemin(D, mask);
+Ld2 = watershed(D2);
+
+
+img_3 = filled_dapi;
+img_3(Ld2 == 0) = 0;
+
+figure
+imshow(img_3);
+
+
+
+
+
 
 %% Applying the distance transform for watershedding
 
-D = -bwdist(~img);
+D = bwdist(~img);
 
 figure(2)
 imshow(D,[]);
