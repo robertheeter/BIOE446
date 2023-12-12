@@ -3,6 +3,7 @@
 %addpath(genpath('data/CMV_smFISH/DAPI'));
 %filename = 'DAPI_A.tif';
 
+addpath(genpath('data/'));
 filename = 'watershed_example.png';
 img = imread(filename);
 
