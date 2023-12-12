@@ -1,4 +1,4 @@
-% IMAGES: B
+% IMAGES: C
 
 %% GLOBAL VARIABLES
 global area_size_thresh
@@ -6,10 +6,10 @@ global single_mrna_thresh
 global nascent_intensity_thresh
 
 % threshold area size for nuclei detection
-area_size_thresh = 5000;
+area_size_thresh = 3000;
 
 % threshold intensity for single mRNA molecule
-single_mrna_thresh  = 0.02;
+single_mrna_thresh  = 0.01;
 
 % threshold intensity for nascent mRNA at transcription site
 nascent_intensity_thresh = 7;
@@ -20,12 +20,12 @@ nascent_intensity_thresh = 7;
 % Segment DAPI image into objects
 % Calculate area of each object to isolate nuclei
 
-fprintf('IMAGES: B\n')
+fprintf('IMAGES: C\n')
 fprintf('RUNNING STEP 1:\n\n')
 
 addpath(genpath('data/CMV_smFISH/'));
-dapi_file = 'DAPI/DAPI_B.tif';
-mrna_file = 'mRNA/mRNA_B.tif';
+dapi_file = 'DAPI/DAPI_C.tif';
+mrna_file = 'mRNA/mRNA_C.tif';
 
 dapi_img = im2double(imread(dapi_file));
 mrna_img = im2double(imread(mrna_file));
@@ -69,7 +69,7 @@ fprintf('RUNNING STEP 3:\n\n')
 
 figure
 histogram(all_spots(all_spots <= 0.1), 50)
-title('Image B')
+title('Image C')
 xlabel('Intensity')
 ylabel('Frequency')
 % from histogram, appears that 0.02 is intensity for single mRNA
@@ -98,7 +98,7 @@ for i = 1:num_objects
         nucleus_mask = (labels == i);
         [num_spots, intensities] = isolate_mrna(dapi_binary_img, mrna_img, nucleus_mask);
         num_mrna = [num_mrna; sum(intensities)/single_mrna_thresh];
-        % intensities
+        
         if (1 <= sum(intensities > nascent_intensity_thresh)) && (sum(intensities > nascent_intensity_thresh) <= 2)
             fprintf('Cell has %i transcription site(s)\n', sum(intensities > nascent_intensity_thresh));
             nascent = sum(intensities(intensities > nascent_intensity_thresh))/single_mrna_thresh;

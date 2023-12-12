@@ -1,4 +1,4 @@
-% IMAGES: B
+% IMAGES: D
 
 %% GLOBAL VARIABLES
 global area_size_thresh
@@ -9,7 +9,7 @@ global nascent_intensity_thresh
 area_size_thresh = 5000;
 
 % threshold intensity for single mRNA molecule
-single_mrna_thresh  = 0.02;
+single_mrna_thresh  = 0.01;
 
 % threshold intensity for nascent mRNA at transcription site
 nascent_intensity_thresh = 7;
@@ -20,12 +20,12 @@ nascent_intensity_thresh = 7;
 % Segment DAPI image into objects
 % Calculate area of each object to isolate nuclei
 
-fprintf('IMAGES: B\n')
+fprintf('IMAGES: D\n')
 fprintf('RUNNING STEP 1:\n\n')
 
 addpath(genpath('data/CMV_smFISH/'));
-dapi_file = 'DAPI/DAPI_B.tif';
-mrna_file = 'mRNA/mRNA_B.tif';
+dapi_file = 'DAPI/DAPI_D.tif';
+mrna_file = 'mRNA/mRNA_D.tif';
 
 dapi_img = im2double(imread(dapi_file));
 mrna_img = im2double(imread(mrna_file));
@@ -34,9 +34,9 @@ figure
 imshow(dapi_img)
 title('Original DAPI Image')
 
-figure
-imshow(mrna_img)
-title('Original mRNA Image')
+% figure
+% imshow(mrna_img)
+% title('Original mRNA Image')
 
 [areas, labels, num_objects, num_nuclei, dapi_binary_img] = isolate_nuclei(dapi_img);
 fprintf('There are %i detected nuclei.\n', num_nuclei)
@@ -69,7 +69,7 @@ fprintf('RUNNING STEP 3:\n\n')
 
 figure
 histogram(all_spots(all_spots <= 0.1), 50)
-title('Image B')
+title('Image D')
 xlabel('Intensity')
 ylabel('Frequency')
 % from histogram, appears that 0.02 is intensity for single mRNA
@@ -136,7 +136,7 @@ function [areas, labels, num_objects, num_nuclei, dapi_img_2] = isolate_nuclei(d
     filtered_dapi = medfilt2(dapi_img, [3, 3]);
     
     % Adaptive thresholding to binarize the image
-    threshold = adaptthresh(filtered_dapi, 0.5);
+    threshold = adaptthresh(filtered_dapi, 0.65);
     binary_dapi = imbinarize(filtered_dapi, threshold);
     
     % Fill holes in the binary image
@@ -146,7 +146,7 @@ function [areas, labels, num_objects, num_nuclei, dapi_img_2] = isolate_nuclei(d
     D = -bwdist(~filled_dapi);
     
     % Filtering out tiny local minimum
-    mask = imextendedmin(D, 2);
+    mask = imextendedmin(D, 7);
     D2 = imimposemin(D, mask);
     Ld2 = watershed(D2);
     

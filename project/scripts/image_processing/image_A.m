@@ -1,4 +1,4 @@
-% IMAGES: B
+% IMAGES: A
 
 %% GLOBAL VARIABLES
 global area_size_thresh
@@ -20,12 +20,12 @@ nascent_intensity_thresh = 7;
 % Segment DAPI image into objects
 % Calculate area of each object to isolate nuclei
 
-fprintf('IMAGES: B\n')
+fprintf('IMAGES: A\n')
 fprintf('RUNNING STEP 1:\n\n')
 
 addpath(genpath('data/CMV_smFISH/'));
-dapi_file = 'DAPI/DAPI_B.tif';
-mrna_file = 'mRNA/mRNA_B.tif';
+dapi_file = 'DAPI/DAPI_A.tif';
+mrna_file = 'mRNA/mRNA_A.tif';
 
 dapi_img = im2double(imread(dapi_file));
 mrna_img = im2double(imread(mrna_file));
@@ -68,8 +68,8 @@ fprintf('###############################\n\n')
 fprintf('RUNNING STEP 3:\n\n')
 
 figure
-histogram(all_spots(all_spots <= 0.1), 50)
-title('Image B')
+histogram(all_spots, 40)
+title('Image A')
 xlabel('Intensity')
 ylabel('Frequency')
 % from histogram, appears that 0.02 is intensity for single mRNA
