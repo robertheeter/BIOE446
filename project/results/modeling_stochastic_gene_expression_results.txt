@@ -1,0 +1,52 @@
+mRNA_f =
+
+  479.0102
+
+
+mRNA_n =
+
+   7.1688e+03
+
+
+gamma_1 =
+
+    0.0500
+
+
+k_tsc =
+
+    21
+
+
+k_release =
+
+    0.0033
+
+
+k_prod =
+
+   23.9505
+
+
+k_on =
+
+    0.0500
+
+
+k_off =
+
+   -0.0062
+
+total_mRNA_sim_mean =
+
+   69.2030
+
+
+total_mRNA_sim_var =
+
+  354.7265
+
+
+total_mRNA_sim_cv =
+
+    0.2722
