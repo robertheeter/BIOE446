@@ -34,9 +34,9 @@ figure
 imshow(dapi_img)
 title('Original DAPI Image')
 
-figure
-imshow(mrna_img)
-title('Original mRNA Image')
+% figure
+% imshow(mrna_img)
+% title('Original mRNA Image')
 
 [areas, labels, num_objects, num_nuclei, dapi_binary_img] = isolate_nuclei(dapi_img);
 fprintf('There are %i detected nuclei.\n', num_nuclei)
@@ -104,6 +104,7 @@ for i = 1:num_objects
             nascent = sum(intensities(intensities > nascent_intensity_thresh))/single_mrna_thresh;
             nascent_mrna = [nascent_mrna; nascent];
         else
+            nascent_mrna = [nascent_mrna; 0];
             fprintf('Cell does not have nascent mRNA\n')
         end
         fprintf('--------------------\n')
@@ -122,6 +123,24 @@ fprintf('There are %i nascent mRNA molecules in the image.\n\n', total_nascent_m
 
 total_free_mrna = total_mrna - total_nascent_mrna;
 fprintf('There are %i free mRNA molecules in the image.\n\n', total_free_mrna)
+
+fprintf('Mean nascent mRNA per cell: %i\n', mean(nascent_mrna))
+fprintf('Mean free mRNA per cell: %i\n\n', mean(num_mrna - nascent_mrna))
+
+fprintf('Variance nascent mRNA per cell: %i\n', var(nascent_mrna))
+fprintf('Variance free mRNA per cell: %i\n\n', var(num_mrna - nascent_mrna))
+
+fprintf('CV nascent mRNA per cell: %i\n', std(nascent_mrna)/mean(nascent_mrna))
+fprintf('CV free mRNA per cell: %i\n\n', std(num_mrna - nascent_mrna)/mean(num_mrna - nascent_mrna))
+
+cc = corr(nascent_mrna, (num_mrna - nascent_mrna));
+fprintf('Correlation coefficient: %i\n\n', cc)
+
+figure
+scatter(nascent_mrna, (num_mrna - nascent_mrna), 'filled');
+xlabel('Nascent mRNA')
+ylabel('Free mRNA')
+title('Image A: Nascent mRNA vs. Free mRNA Per Cell')
 
 fprintf('###############################\n\n')
 
