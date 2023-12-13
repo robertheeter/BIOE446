@@ -30,9 +30,9 @@ mrna_file = 'mRNA/mRNA_E.tif';
 dapi_img = im2double(imread(dapi_file));
 mrna_img = im2double(imread(mrna_file));
 
-figure
-imshow(dapi_img)
-title('Original DAPI Image')
+% figure
+% imshow(dapi_img)
+% title('Original DAPI Image')
 
 % figure
 % imshow(mrna_img)
@@ -55,7 +55,7 @@ for i = 1:num_objects
     if areas(i) > area_size_thresh
         nucleus_mask = (labels == i);
         [num_spots, intensities] = isolate_mrna(dapi_binary_img, mrna_img, nucleus_mask);
-
+        
         all_spots = [all_spots; intensities];
     end
 end
@@ -174,7 +174,7 @@ function [areas, labels, num_objects, num_nuclei, dapi_img_2] = isolate_nuclei(d
 
     figure
     imshow(dapi_img_2)
-    title('Segmented DAPI Image')
+    title('Image E: Segmented DAPI Image')
 
     % Get areas of objects
     areas = table2array(regionprops('Table', dapi_img_2, 'Area'));
@@ -203,7 +203,7 @@ function [num_spots, intensities] = isolate_mrna(dapi_binary_img, mrna_img, nucl
 
     % figure
     % imshow(mrna_binary)
-    % title('Isolated nucleus - mRNA')
+    % title('Image E: Binary smFISH Image')
     
     mrna_labeled = bwlabel(mrna_binary_isolated);
 
