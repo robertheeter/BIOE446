@@ -61,6 +61,8 @@ ylabel('Frequency')
 title('Histogram of free mRNA at t_{max} = 100 min')
 
 %% DETERMINE STATISTICS
+mRNA_n_sim_var = var(mRNA_n_sim)
+
 total_mRNA_sim = mRNA_n_sim + mRNA_f_sim;
 
 total_mRNA_sim_mean = mean(total_mRNA_sim)
